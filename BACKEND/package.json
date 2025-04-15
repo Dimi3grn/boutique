@@ -3,14 +3,17 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "start": "supervisor app.js"
+    "start": "supervisor app.js",
+    "setup-db": "node scripts/setup-database.js",
+    "import-data": "node scripts/import-data.js"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "mysql2": "^3.14.0"
   },
   "devDependencies": {
     "supervisor": "^0.12.0"
