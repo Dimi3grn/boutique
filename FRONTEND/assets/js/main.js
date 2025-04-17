@@ -2,7 +2,7 @@ const url = "http://localhost:3000/";
 
 
 
-fetch(`${url}api/sneakers`)
+fetch(`${url}api/watches`)
 .then(response => response.json())
 .then(data => {
     console.log(data);
