@@ -118,12 +118,32 @@ function displayColors(colors) {
     const colorsList = document.getElementById('colors-list');
     if (!colorsList) return;
     
+    // Ajout de console.log pour déboguer
+    console.log("Colors data received:", colors);
+    
+    // Vérifiez si colors est un tableau et s'il contient des éléments
+    if (!Array.isArray(colors) || colors.length === 0) {
+        console.log("No colors to display or invalid format");
+        document.querySelector('.colors').style.display = 'none';
+        return;
+    }
+    
     colors.forEach((color, index) => {
+        // Récupérer les noms de propriétés dynamiquement
+        const colorCode = color.hex_code || color.code || color.couleur_code;
+        const colorName = color.name || color.nom || color.couleur_nom;
+        const colorId = color.color_id || color.id || color.couleur_id;
+        
+        if (!colorCode) {
+            console.log("Missing color code for:", color);
+            return;
+        }
+        
         const colorOption = document.createElement('div');
         colorOption.className = `color-option ${index === 0 ? 'active' : ''}`;
-        colorOption.style.backgroundColor = color.hex_code;
-        colorOption.setAttribute('title', color.name);
-        colorOption.setAttribute('data-color-id', color.color_id);
+        colorOption.style.backgroundColor = colorCode;
+        colorOption.setAttribute('title', colorName || 'Color');
+        colorOption.setAttribute('data-color-id', colorId || index);
         
         colorOption.addEventListener('click', function() {
             document.querySelectorAll('.color-option').forEach(opt => {

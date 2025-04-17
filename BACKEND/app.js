@@ -2,14 +2,16 @@ const express = require("express");
 const app = express();
 const port = 3000;
 const cors = require("cors");
+const path = require("path");
 
-app.use(cors({ origin: "*" })); // Allow all origins for testing
-app.use(express.json()); // Parse JSON data
+app.use(cors({ origin: "*" }));
+app.use(express.json());
 
-// Make sure you're importing routes correctly
+// Configuration pour servir les fichiers statiques
+app.use('/static', express.static(path.join(__dirname, 'public')));
+
+// Vos routes existantes
 const watchesRoutes = require("./routes/watches");
-// This line should be app.use("/api", watchesRoutes) and not app.use("/api", watchesRoutes.router)
-// or some other incorrect format
 app.use("/api", watchesRoutes);
 
 app.listen(port, () => {

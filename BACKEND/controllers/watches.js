@@ -103,6 +103,7 @@ exports.getWatchCategories = async (req, res) => {
 exports.getWatchColors = async (req, res) => {
     try {
         const watchId = parseInt(req.params.id);
+        console.log("Fetching colors for watch ID:", watchId);
         
         const [rows] = await pool.query(
             'SELECT c.* FROM colors c ' +
@@ -111,6 +112,9 @@ exports.getWatchColors = async (req, res) => {
             [watchId]
         );
         
+        console.log("Colors found:", rows);
+        
+        // Vérifiez si la structure de votre réponse correspond à ce qu'attend le frontend
         res.status(200).json({
             message: "Colors found",
             colors: rows
@@ -121,7 +125,6 @@ exports.getWatchColors = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
-
 // Get materials for a specific watch
 exports.getWatchMaterials = async (req, res) => {
     try {
