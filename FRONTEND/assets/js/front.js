@@ -45,3 +45,10 @@ document.addEventListener('DOMContentLoaded', function() {
     lastScrollTop = scrollTop;
   });
 });
+
+const featuredButton = document.querySelector("#featured-button");
+if (featuredButton) {
+  featuredButton.addEventListener('click', () => {
+    window.location.href = 'product.html?id=6'; // Redirect to product page with ID 6
+  });
+}
