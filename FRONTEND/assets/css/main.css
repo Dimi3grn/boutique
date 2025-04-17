@@ -17,7 +17,7 @@ header{
     background-color: #fff;
     position: relative;
     text-align: center;
-    height: 90px;
+    height: 80px;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -58,7 +58,7 @@ header{
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    width: 30px;
+    width: 28px;
     height: 21px;
     background: transparent;
     border: none;
@@ -70,7 +70,7 @@ header{
 
 .hamburger-line {
     width: 100%;
-    height: 3px;
+    height: 2px;
     background-color: #000;
     transition: all 0.3s ease;
 }
@@ -126,3 +126,77 @@ header{
     font-size: 18px;
 }
 
+.svgdiv {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.heart, .user, .cart {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.heart img, .user img, .cart img {
+    width: 100%;
+    height: 100%;
+}
+
+.heart{
+    margin-left: 15px;
+}
+
+.pageContent{
+    width: 100vw;
+}
+
+.videoMain{
+    width: 100%;
+    height: 85vh;
+    
+}
+
+.videoMain video{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+
+.categories-rec{
+    margin-top: 20px;
+    width: 100%;
+    height: 70vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.categories-rec h2{
+    margin-bottom: 40px;
+}
+
+
+
+.categories-cont{
+    width: 100vh;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 25px;
+}
+
+.cat{
+    width: 400px;
+    height: 500px;
+    text-align: center;
+}
+
+.cat img{
+    width: 400px;
+    height: 100%;
+    object-fit: cover;
+}
