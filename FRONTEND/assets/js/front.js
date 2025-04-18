@@ -1,9 +1,38 @@
 const burgerBtn = document.querySelector(".hamburger-button");
-    
-    burgerBtn.addEventListener('click', () => {
-      burgerBtn.classList.toggle('active');
+const sideMenu = document.querySelector(".side-menu");
+const menuOverlay = document.querySelector(".menu-overlay");
+
+burgerBtn.addEventListener('click', () => {
+  burgerBtn.classList.toggle('active');
+  sideMenu.classList.toggle('active');
+  menuOverlay.classList.toggle('active');
+  
+  // Empêche le défilement du contenu quand le menu est ouvert
+  if (sideMenu.classList.contains('active')) {
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
 });
 
+// Fermer le menu quand on clique sur l'overlay
+menuOverlay.addEventListener('click', () => {
+  burgerBtn.classList.remove('active');
+  sideMenu.classList.remove('active');
+  menuOverlay.classList.remove('active');
+  document.body.style.overflow = '';
+});
+
+// Fermer le menu quand on clique sur un lien du menu
+const menuLinks = document.querySelectorAll('.menu-links a');
+menuLinks.forEach(link => {
+  link.addEventListener('click', () => {
+    burgerBtn.classList.remove('active');
+    sideMenu.classList.remove('active');
+    menuOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  });
+});
 
 document.addEventListener('DOMContentLoaded', function() {
   // Wait a bit to make sure everything is loaded

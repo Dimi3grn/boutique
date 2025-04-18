@@ -62,6 +62,7 @@ header{
 
 .menu{
     display: flex;
+    z-index: 1000;
 }
 
 .hamburger-button {
@@ -238,3 +239,66 @@ header{
     cover;
 }
 
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 300px;
+    height: 100vh;
+    background-color: white;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+    transition: left 0.3s ease;
+    padding-top: 80px;
+    overflow-y: auto;
+  }
+  
+  .side-menu.active {
+    left: 0;
+  }
+  
+  .menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    display: none;
+  }
+  
+  .menu-overlay.active {
+    display: block;
+  }
+  
+  .menu-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .menu-links li {
+    padding: 15px 25px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .menu-links li a {
+    color: #333;
+    text-decoration: none;
+    font-size: 18px;
+    display: block;
+    transition: color 0.3s;
+  }
+  
+  .menu-links li a:hover {
+    color: #888;
+  }
+  
+  .title a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+
+  
