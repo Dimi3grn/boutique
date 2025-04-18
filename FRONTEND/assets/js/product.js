@@ -44,16 +44,32 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function displayWatchDetails(watch) {
     const container = document.querySelector('#product-container');
+    const backendUrl = "http://localhost:3000"; // URL du serveur backend
+    
+    // Fonction pour obtenir le chemin complet des images
+    const getFullImagePath = (imagePath) => {
+        if (!imagePath) return '';
+        if (imagePath.startsWith('http') || imagePath.startsWith('//')) {
+            return imagePath;
+        }
+        if (imagePath.startsWith('/')) {
+            return backendUrl + imagePath;
+        }
+        return backendUrl + '/' + imagePath;
+    };
+    
+    const image1Full = getFullImagePath(watch.image1);
+    const image2Full = getFullImagePath(watch.image2);
     
     // Create HTML structure for product details
     const productHTML = `
         <div class="product-images">
             <div class="main-image">
-                <img id="main-product-image" src="${watch.image1}" alt="${watch.nom}">
+                <img id="main-product-image" src="${image1Full}" alt="${watch.nom}">
             </div>
             <div class="thumbnail-images" id="thumbnail-container">
-                ${watch.image1 ? `<div class="thumbnail active"><img src="${watch.image1}" alt="Thumbnail 1" onclick="changeMainImage('${watch.image1}', this)"></div>` : ''}
-                ${watch.image2 ? `<div class="thumbnail"><img src="${watch.image2}" alt="Thumbnail 2" onclick="changeMainImage('${watch.image2}', this)"></div>` : ''}
+                ${image1Full ? `<div class="thumbnail active"><img src="${image1Full}" alt="Thumbnail 1" onclick="changeMainImage('${image1Full}', this)"></div>` : ''}
+                ${image2Full ? `<div class="thumbnail"><img src="${image2Full}" alt="Thumbnail 2" onclick="changeMainImage('${image2Full}', this)"></div>` : ''}
             </div>
         </div>
 

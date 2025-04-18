@@ -125,6 +125,7 @@ exports.getWatchColors = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
 // Get materials for a specific watch
 exports.getWatchMaterials = async (req, res) => {
     try {
