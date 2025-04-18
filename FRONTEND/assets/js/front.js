@@ -1,9 +1,12 @@
 const burgerBtn = document.querySelector(".hamburger-button");
+const menu = document.querySelector(".menu");
 const sideMenu = document.querySelector(".side-menu");
 const menuOverlay = document.querySelector(".menu-overlay");
 
+// Animation du bouton hamburger et ouverture du menu
 burgerBtn.addEventListener('click', () => {
   burgerBtn.classList.toggle('active');
+  menu.classList.toggle('active');
   sideMenu.classList.toggle('active');
   menuOverlay.classList.toggle('active');
   
@@ -18,6 +21,7 @@ burgerBtn.addEventListener('click', () => {
 // Fermer le menu quand on clique sur l'overlay
 menuOverlay.addEventListener('click', () => {
   burgerBtn.classList.remove('active');
+  menu.classList.remove('active');
   sideMenu.classList.remove('active');
   menuOverlay.classList.remove('active');
   document.body.style.overflow = '';
@@ -28,6 +32,7 @@ const menuLinks = document.querySelectorAll('.menu-links a');
 menuLinks.forEach(link => {
   link.addEventListener('click', () => {
     burgerBtn.classList.remove('active');
+    menu.classList.remove('active');
     sideMenu.classList.remove('active');
     menuOverlay.classList.remove('active');
     document.body.style.overflow = '';
@@ -38,8 +43,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // Wait a bit to make sure everything is loaded
   setTimeout(function() {
       const video = document.getElementById('background-video');
-      video.play();
-      video.loop = true;
+      if (video) {
+        video.play();
+        video.loop = true;
+      }
   }, 500); // 500ms delay, adjust as needed
 
   const header = document.querySelector('header');
@@ -51,8 +58,6 @@ document.addEventListener('DOMContentLoaded', function() {
   header.style.width = '100%';
   header.style.zIndex = '1000';
   header.style.transition = 'transform 0.3s ease-in-out';
-  
-
   
   // Ajoute un espace pour compenser la hauteur du header en fixed
   const headerHeight = header.offsetHeight;
@@ -75,6 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+// Pour la page d'accueil uniquement
 const featuredButton = document.querySelector("#featured-button");
 if (featuredButton) {
   featuredButton.addEventListener('click', () => {

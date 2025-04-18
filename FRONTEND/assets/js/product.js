@@ -64,39 +64,12 @@ function displayWatchDetails(watch) {
     // Create HTML structure for product details
     const productHTML = `
         <div class="product-images">
-            <div class="carousel-container">
-                <button class="carousel-arrow prev" onclick="prevSlide()">
-                    <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                </button>
-                
-                <div class="carousel-slide active">
-                    <img src="${image1Full}" alt="${watch.nom} - Image 1">
-                </div>
-                
-                ${image2Full ? `
-                <div class="carousel-slide">
-                    <img src="${image2Full}" alt="${watch.nom} - Image 2">
-                </div>
-                ` : ''}
-                
-                <button class="carousel-arrow next" onclick="nextSlide()">
-                    <svg class="arrow-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </button>
+            <div class="main-image">
+                <img id="main-product-image" src="${image1Full}" alt="${watch.nom}">
             </div>
-            
-            <div class="thumbnail-images">
-                <div class="thumbnail active" onclick="showSlide(0)">
-                    <img src="${image1Full}" alt="Thumbnail 1">
-                </div>
-                ${image2Full ? `
-                <div class="thumbnail" onclick="showSlide(1)">
-                    <img src="${image2Full}" alt="Thumbnail 2">
-                </div>
-                ` : ''}
+            <div class="thumbnail-images" id="thumbnail-container">
+                ${image1Full ? `<div class="thumbnail active"><img src="${image1Full}" alt="Thumbnail 1" onclick="changeMainImage('${image1Full}', this)"></div>` : ''}
+                ${image2Full ? `<div class="thumbnail"><img src="${image2Full}" alt="Thumbnail 2" onclick="changeMainImage('${image2Full}', this)"></div>` : ''}
             </div>
         </div>
 
@@ -112,22 +85,22 @@ function displayWatchDetails(watch) {
             </div>
             
             <div class="product-description">
-                <p>${watch.description || "Une montre élégante et raffinée qui allie performance et style. Cette pièce d'horlogerie exceptionnelle est conçue pour les amateurs de montres qui apprécient la précision et le savoir-faire."}</p>
+                <p>${watch.description}</p>
             </div>
 
             <div class="product-attributes">
                 <div class="categories">
-                    <h3>Catégories</h3>
+                    <h3>Catégories:</h3>
                     <ul id="categories-list"></ul>
                 </div>
                 
                 <div class="colors">
-                    <h3>Couleurs disponibles</h3>
+                    <h3>Couleurs disponibles:</h3>
                     <div id="colors-list" class="color-options"></div>
                 </div>
                 
                 <div class="materials">
-                    <h3>Matériaux</h3>
+                    <h3>Matériaux:</h3>
                     <ul id="materials-list"></ul>
                 </div>
             </div>
@@ -135,7 +108,7 @@ function displayWatchDetails(watch) {
             <div class="product-actions">
                 <div class="quantity-selector">
                     <button onclick="decreaseQuantity()">-</button>
-                    <input type="number" id="quantity" value="1" min="1" max="${watch.stock || 10}">
+                    <input type="number" id="quantity" value="1" min="1" max="${watch.stock}">
                     <button onclick="increaseQuantity()">+</button>
                 </div>
                 <button class="add-to-cart-btn" onclick="addToCart(${watch.montre_id})">Ajouter au panier</button>
@@ -144,37 +117,6 @@ function displayWatchDetails(watch) {
     `;
     
     container.innerHTML = productHTML;
-}
-
-// Fonctions pour le carousel
-let currentSlide = 0;
-
-function showSlide(index) {
-    const slides = document.querySelectorAll('.carousel-slide');
-    const thumbnails = document.querySelectorAll('.thumbnail');
-    
-    if (index < 0) index = slides.length - 1;
-    if (index >= slides.length) index = 0;
-    
-    currentSlide = index;
-    
-    // Hide all slides and remove active class from thumbnails
-    slides.forEach(slide => slide.classList.remove('active'));
-    thumbnails.forEach(thumb => thumb.classList.remove('active'));
-    
-    // Show the current slide and activate its thumbnail
-    slides[currentSlide].classList.add('active');
-    thumbnails[currentSlide].classList.add('active');
-}
-
-function nextSlide() {
-    const slides = document.querySelectorAll('.carousel-slide');
-    showSlide(currentSlide + 1);
-}
-
-function prevSlide() {
-    const slides = document.querySelectorAll('.carousel-slide');
-    showSlide(currentSlide - 1);
 }
 
 function displayCategories(categories) {
@@ -236,9 +178,18 @@ function displayMaterials(materials) {
     
     materials.forEach(material => {
         const li = document.createElement('li');
-        li.textContent = material.name || material.nom;
+        li.textContent = material.name;
         materialsList.appendChild(li);
     });
+}
+
+// Helper functions
+function changeMainImage(src, thumbnailElement) {
+    document.getElementById('main-product-image').src = src;
+    document.querySelectorAll('.thumbnail').forEach(thumb => {
+        thumb.classList.remove('active');
+    });
+    thumbnailElement.parentElement.classList.add('active');
 }
 
 function decreaseQuantity() {
@@ -273,4 +224,4 @@ function addToCart(productId) {
     alert('Product added to cart!');
     
     // Here you would typically send this data to your server or store in localStorage
-}
+}   
