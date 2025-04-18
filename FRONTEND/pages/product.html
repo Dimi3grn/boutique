@@ -10,7 +10,6 @@
 <body>
     <main>
         <header>
-            <!-- Same header as index.html -->
             <div class="left">
                 <div class="menu">
                     <div class="hamburger-button">
@@ -33,22 +32,26 @@
             </div>
             <div class="right">
                 <div class="contact">
-                    <h2>Contactez-nous</h2>
+                    <p>Contactez-nous</p>
                 </div>
                 <div class="svgdiv">
-                    <div class="heart"></div>
-                    <div class="user"></div>
-                    <div class="cart"></div>
+                    <div class="heart">
+                        <img src="../assets/svg/heart.svg" alt="Heart">
+                    </div>
+                    <div class="user">
+                        <img src="../assets/svg/profile.svg" alt="User">
+                    </div>
+                    <div class="cart">
+                        <img src="../assets/svg/cart.svg" alt="Cart">
+                    </div>
                 </div>
             </div>
         </header>
         
-        <section class="product-details">
-            <div id="product-container">
-                <!-- Product details will be loaded here -->
-                <p>Loading product details...</p>
-            </div>
-        </section>
+        <div class="product-container" id="product-container">
+            <!-- Product details will be loaded here -->
+            <p class="loading-text">Loading product details...</p>
+        </div>
     </main>
     
     <script src="../assets/js/frontp.js"></script>
