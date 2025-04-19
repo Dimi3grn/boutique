@@ -160,6 +160,8 @@ header{
 
 .pageContent{
     width: 100vw;
+    height: 200vh;
+    overflow: hidden;
 }
 
 .videoMain{
