@@ -148,3 +148,87 @@ exports.getWatchMaterials = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
+exports.filterWatches = async (req, res) => {
+    try {
+        // Récupérer les paramètres de filtrage de la requête
+        const { categories, colors, priceMin, priceMax, hasDiscount } = req.query;
+        
+        // Construire la requête SQL de base
+        let query = 'SELECT m.* FROM montre m';
+        let params = [];
+        let conditions = [];
+        let havingConditions = [];
+        let groupBy = 'm.montre_id';
+        let joins = [];
+        
+        // Filtrer par plusieurs catégories (montres appartenant à TOUTES les catégories sélectionnées)
+        if (categories && categories.length > 0) {
+            const categoryIds = categories.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
+            
+            if (categoryIds.length > 0) {
+                joins.push('JOIN have h ON m.montre_id = h.montre_id');
+                conditions.push('h.categories_id IN (?)');
+                params.push(categoryIds);
+                havingConditions.push(`COUNT(DISTINCT h.categories_id) = ${categoryIds.length}`);
+            }
+        }
+        
+        // Filtrer par couleurs (montres ayant AU MOINS UNE des couleurs sélectionnées)
+        if (colors && colors.length > 0) {
+            const colorIds = colors.split(',').map(id => parseInt(id)).filter(id => !isNaN(id));
+            
+            if (colorIds.length > 0) {
+                joins.push('JOIN have_colors hc ON m.montre_id = hc.montre_id');
+                conditions.push('hc.color_id IN (?)');
+                params.push(colorIds);
+            }
+        }
+        
+        // Ajouter le reste des conditions
+        if (priceMin && !isNaN(parseFloat(priceMin))) {
+            conditions.push('m.prix >= ?');
+            params.push(parseFloat(priceMin));
+        }
+        
+        if (priceMax && !isNaN(parseFloat(priceMax))) {
+            conditions.push('m.prix <= ?');
+            params.push(parseFloat(priceMax));
+        }
+        
+        if (hasDiscount === 'true') {
+            conditions.push('m.reduction > 0');
+        }
+        
+        // Construire la requête complète
+        if (joins.length > 0) {
+            query += ' ' + joins.join(' ');
+        }
+        
+        if (conditions.length > 0) {
+            query += ' WHERE ' + conditions.join(' AND ');
+        }
+        
+        query += ` GROUP BY ${groupBy}`;
+        
+        if (havingConditions.length > 0) {
+            query += ' HAVING ' + havingConditions.join(' AND ');
+        }
+        
+        console.log('Query:', query);
+        console.log('Params:', params);
+        
+        // Exécuter la requête
+        const [rows] = await pool.query(query, params);
+        
+        res.status(200).json({
+            message: "Filtered watches found",
+            count: rows.length,
+            watches: rows
+        });
+        
+    } catch (error) {
+        console.error('Error filtering watches:', error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};

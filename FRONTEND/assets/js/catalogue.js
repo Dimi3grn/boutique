@@ -29,15 +29,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Appliquer les filtres
     applyFiltersBtn.addEventListener('click', function() {
         // Récupérer les catégories cochées
+       
         currentFilters.categories = [];
+        
         document.querySelectorAll('#category-filters input:checked').forEach(checkbox => {
             currentFilters.categories.push(parseInt(checkbox.value));
         });
+   
         
         currentFilters.promo = promoFilter.checked;
         currentFilters.maxPrice = parseInt(priceFilter.value);
-        
+        console.log(currentFilters);
         filterAndDisplayWatches();
+        
     });
     
     // Recherche
@@ -106,47 +110,67 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Filtrer et afficher les montres
-    function filterAndDisplayWatches() {
+    async function filterAndDisplayWatches() {
         // Afficher un message de chargement
         productsContainer.innerHTML = '<p class="loading-message">Chargement des produits...</p>';
         
-        // Filtrer les montres
-        let filteredWatches = allWatches;
-        
-        // Filtre par catégorie
-        if (currentFilters.categories.length > 0) {
-            // Ici, on devrait idéalement faire une requête API pour filtrer par catégorie
-            // Mais pour l'exemple, on va supposer que chaque montre a une propriété categories_id
-            filteredWatches = filteredWatches.filter(watch => {
-                // Cette partie est une simulation car nous n'avons pas l'association directe
-                // Dans un cas réel, il faudrait adapter cette logique selon votre structure de données
-                return currentFilters.categories.includes(watch.categories_id);
-            });
+        try {
+            // Construire l'URL de l'API avec les paramètres de filtre
+            const url = "http://localhost:3000/api/filter-watches";
+            const params = new URLSearchParams();
+            
+            // Ajouter les catégories sélectionnées
+            if (currentFilters.categories.length > 0) {
+                params.append('categories', currentFilters.categories.join(','));
+            }
+            
+            // Ajouter les filtres de prix
+            if (currentFilters.maxPrice) {
+                params.append('priceMax', currentFilters.maxPrice);
+            }
+            
+            if (currentFilters.minPrice) {
+                params.append('priceMin', currentFilters.minPrice);
+            }
+            
+            // Ajouter le filtre de promotion
+            if (currentFilters.promo) {
+                params.append('hasDiscount', 'true');
+            }
+            
+            // Construire l'URL complète
+            const apiUrl = `${url}?${params.toString()}`;
+            
+            // Appeler l'API
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            let filteredWatches = data.watches;
+            
+            // Le filtre de recherche est géré côté client car plus flexible
+            if (currentFilters.search) {
+                const searchTerm = currentFilters.search.toLowerCase();
+                filteredWatches = filteredWatches.filter(watch => 
+                    watch.nom.toLowerCase().includes(searchTerm) || 
+                    watch.marque.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Tri également géré côté client
+            filteredWatches = sortWatches(filteredWatches, currentFilters.sort);
+            
+            // Afficher les montres
+            displayWatches(filteredWatches);
+            
+        } catch (error) {
+            console.error('Erreur lors du filtrage des montres:', error);
+            productsContainer.innerHTML = `<p class="error-message">Erreur lors du chargement des produits: ${error.message}</p>`;
         }
-        
-        // Filtre par prix
-        filteredWatches = filteredWatches.filter(watch => watch.prix <= currentFilters.maxPrice);
-        
-        // Filtre par promotion
-        if (currentFilters.promo) {
-            filteredWatches = filteredWatches.filter(watch => watch.reduction > 0);
-        }
-        
-        // Filtre par recherche
-        if (currentFilters.search) {
-            filteredWatches = filteredWatches.filter(watch => 
-                watch.nom.toLowerCase().includes(currentFilters.search) || 
-                watch.marque.toLowerCase().includes(currentFilters.search)
-            );
-        }
-        
-        // Tri
-        filteredWatches = sortWatches(filteredWatches, currentFilters.sort);
-        
-        // Afficher les montres
-        displayWatches(filteredWatches);
     }
-    
     // Trier les montres
     function sortWatches(watches, sortMethod) {
         switch (sortMethod) {

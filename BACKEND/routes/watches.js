@@ -17,4 +17,8 @@ router.get("/watches/:id/colors", controllers.getWatchColors);
 // Get materials for a specific watch
 router.get("/watches/:id/materials", controllers.getWatchMaterials);
 
+
+// Route pour filtrer les montres
+router.get("/filter-watches", controllers.filterWatches);
+
 module.exports = router;
