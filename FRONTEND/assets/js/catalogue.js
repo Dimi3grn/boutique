@@ -1,9 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     const url = "http://localhost:3000/";
-    const backendUrl = "http://localhost:3000";
+    const backendUrl = "http://localhost:3000"; // Défini au niveau global
     const productsContainer = document.getElementById('products-container');
     const categoryFiltersContainer = document.getElementById('category-filters');
-    const colorFiltersContainer = document.getElementById('color-filters');
     const priceFilter = document.getElementById('price-filter');
     const priceValue = document.getElementById('price-value');
     const promoFilter = document.getElementById('promo-filter');
@@ -13,11 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let allWatches = [];
     let categories = [];
-    let colors = []; // Pour stocker les couleurs
     let currentFilters = {
         categories: [],
-        colors: [], // Ajout du tableau pour les couleurs sélectionnées
-        maxPrice: 5000,
+        maxPrice: 50000,
         promo: false,
         search: '',
         sort: 'name-asc'
@@ -32,21 +29,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Appliquer les filtres
     applyFiltersBtn.addEventListener('click', function() {
         // Récupérer les catégories cochées
+       
         currentFilters.categories = [];
+        
         document.querySelectorAll('#category-filters input:checked').forEach(checkbox => {
             currentFilters.categories.push(parseInt(checkbox.value));
         });
-        
-        // Récupérer les couleurs sélectionnées
-        currentFilters.colors = [];
-        document.querySelectorAll('#color-filters .color-swatch.selected').forEach(swatch => {
-            currentFilters.colors.push(parseInt(swatch.dataset.colorId));
-        });
+   
         
         currentFilters.promo = promoFilter.checked;
         currentFilters.maxPrice = parseInt(priceFilter.value);
-        
+        console.log(currentFilters);
         filterAndDisplayWatches();
+        
     });
     
     // Recherche
@@ -70,53 +65,28 @@ document.addEventListener('DOMContentLoaded', function() {
     function fetchAllData() {
         // Récupérer toutes les montres
         fetch(`${url}api/watches`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.watches) {
                 allWatches = data.watches;
-                filterAndDisplayWatchesLocally();
+                filterAndDisplayWatches();
             }
             
             // Récupérer les catégories
             return fetch(`${url}api/categories`);
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             if (data.categories) {
                 categories = data.categories;
                 displayCategoryFilters();
-            }
-            
-            // Récupérer les couleurs
-            return fetch(`${url}api/colors`);
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.colors) {
-                colors = data.colors;
-                displayColorFilters();
             }
         })
         .catch(error => {
             console.error('Erreur lors du chargement des données:', error);
             productsContainer.innerHTML = `
                 <div class="no-products">
-                    <p>Une erreur est survenue lors du chargement des produits: ${error.message}</p>
+                    <p>Une erreur est survenue lors du chargement des produits.</p>
                 </div>
             `;
         });
@@ -124,104 +94,111 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Afficher les catégories dans les filtres
     function displayCategoryFilters() {
-        if (!categoryFiltersContainer) return;
-        
         let html = '';
         
         categories.forEach(category => {
-            const categoryId = category.categories_id;
-            const categoryName = category.name || category.nom || 'Catégorie sans nom';
-            
             html += `
                 <label class="checkbox-container">
-                    <input type="checkbox" value="${categoryId}">
+                    <input type="checkbox" value="${category.categories_id}">
                     <span class="checkmark"></span>
-                    ${categoryName}
+                    ${category.name || category.nom}
                 </label>
             `;
         });
         
+        
+
         categoryFiltersContainer.innerHTML = html;
     }
     
-    // Afficher les couleurs dans les filtres
-    function displayColorFilters() {
-        if (!colorFiltersContainer) return;
-        
-        let html = '';
-        
-        colors.forEach(color => {
-            const colorId = color.color_id;
-            const colorName = color.name || color.nom || 'Couleur';
-            const colorCode = color.hex_code || color.code || '#CCCCCC';
-            
-            html += `
-                <div class="color-filter-container">
-                    <div class="color-swatch" 
-                        data-color-id="${colorId}" 
-                        style="background-color: ${colorCode};"
-                        onclick="toggleColorFilter(this)">
-                    </div>
-                    <span class="color-name">${colorName}</span>
-                </div>
-            `;
-        });
-        
-        colorFiltersContainer.innerHTML = html;
-    }
-    
-    // Fonction pour activer/désactiver un filtre de couleur
-    window.toggleColorFilter = function(element) {
-        element.classList.toggle('selected');
-    };
-    
-    // Filtrer et afficher les montres (filtrage côté client)
-    function filterAndDisplayWatchesLocally() {
+    // Filtrer et afficher les montres
+    async function filterAndDisplayWatches() {
         // Afficher un message de chargement
         productsContainer.innerHTML = '<p class="loading-message">Chargement des produits...</p>';
         
-        // Filtrer les montres
-        let filteredWatches = [...allWatches];
-        
-        // Filtre par prix
-        filteredWatches = filteredWatches.filter(watch => 
-            parseFloat(watch.prix) <= currentFilters.maxPrice
-        );
-        
-        // Filtre par promotion
-        if (currentFilters.promo) {
-            filteredWatches = filteredWatches.filter(watch => 
-                parseFloat(watch.reduction) > 0
-            );
+        try {
+            // Construire l'URL de l'API avec les paramètres de filtre
+            const url = "http://localhost:3000/api/filter-watches";
+            const params = new URLSearchParams();
+            
+            // Ajouter les catégories sélectionnées
+            if (currentFilters.categories.length > 0) {
+                params.append('categories', currentFilters.categories.join(','));
+            }
+            currentFilters.colors = [];
+            if (currentFilters.colors.length > 0) {
+                params.append('colors', currentFilters.colors.join(','));
+            }
+
+            // Ajouter les filtres de prix
+            if (currentFilters.maxPrice) {
+                params.append('priceMax', currentFilters.maxPrice);
+            }
+            
+            if (currentFilters.minPrice) {
+                params.append('priceMin', currentFilters.minPrice);
+            }
+            
+            // Ajouter le filtre de promotion
+            if (currentFilters.promo) {
+                params.append('hasDiscount', 'true');
+            }
+            
+            // Construire l'URL complète
+            const apiUrl = `${url}?${params.toString()}`;
+            
+            // Appeler l'API
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            let filteredWatches = data.watches;
+            
+            // Le filtre de recherche est géré côté client car plus flexible
+            if (currentFilters.search) {
+                const searchTerm = currentFilters.search.toLowerCase();
+                filteredWatches = filteredWatches.filter(watch => 
+                    watch.nom.toLowerCase().includes(searchTerm) || 
+                    watch.marque.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Tri également géré côté client
+            filteredWatches = sortWatches(filteredWatches, currentFilters.sort);
+            
+            // Afficher les montres
+            displayWatches(filteredWatches);
+            
+        } catch (error) {
+            console.error('Erreur lors du filtrage des montres:', error);
+            productsContainer.innerHTML = `<p class="error-message">Erreur lors du chargement des produits: ${error.message}</p>`;
         }
-        
-        // Filtre par recherche
-        if (currentFilters.search) {
-            const searchTerm = currentFilters.search.toLowerCase();
-            filteredWatches = filteredWatches.filter(watch => 
-                (watch.nom && watch.nom.toLowerCase().includes(searchTerm)) || 
-                (watch.marque && watch.marque.toLowerCase().includes(searchTerm))
-            );
-        }
-        
-        // Tri
-        switch (currentFilters.sort) {
+    }
+    // Trier les montres
+    function sortWatches(watches, sortMethod) {
+        switch (sortMethod) {
             case 'name-asc':
-                filteredWatches.sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
-                break;
+                return watches.sort((a, b) => a.nom.localeCompare(b.nom));
             case 'name-desc':
-                filteredWatches.sort((a, b) => (b.nom || '').localeCompare(a.nom || ''));
-                break;
+                return watches.sort((a, b) => b.nom.localeCompare(a.nom));
             case 'price-asc':
-                filteredWatches.sort((a, b) => parseFloat(a.prix) - parseFloat(b.prix));
-                break;
+                return watches.sort((a, b) => {
+                    const priceA = a.reduction > 0 ? a.prix * (1 - a.reduction/100) : a.prix;
+                    const priceB = b.reduction > 0 ? b.prix * (1 - b.reduction/100) : b.prix;
+                    return priceA - priceB;
+                });
             case 'price-desc':
-                filteredWatches.sort((a, b) => parseFloat(b.prix) - parseFloat(a.prix));
-                break;
+                return watches.sort((a, b) => {
+                    const priceA = a.reduction > 0 ? a.prix * (1 - a.reduction/100) : a.prix;
+                    const priceB = b.reduction > 0 ? b.prix * (1 - b.reduction/100) : b.prix;
+                    return priceB - priceA;
+                });
+            default:
+                return watches;
         }
-        
-        // Afficher les montres
-        displayWatches(filteredWatches);
     }
     
     // Fonction pour obtenir le chemin complet des images
@@ -251,29 +228,26 @@ document.addEventListener('DOMContentLoaded', function() {
         
         watches.forEach(watch => {
             // Calculer le prix après réduction
-            const reduction = parseFloat(watch.reduction) || 0;
-            const prix = parseFloat(watch.prix) || 0;
-            const displayPrice = reduction > 0 ? prix * (1 - reduction/100) : prix;
-            const devise = watch.devise || '€';
+            const displayPrice = watch.reduction > 0 
+                ? watch.prix * (1 - watch.reduction/100) 
+                : watch.prix;
             
             // Formatter le chemin de l'image
             const imagePath = getFullImagePath(watch.image1);
-            const imageHoverPath = watch.image2 ? getFullImagePath(watch.image2) : imagePath;
             
             html += `
                 <div class="product-card" onclick="window.location.href='product.html?id=${watch.montre_id}'">
                     <div class="product-image">
-                        <img src="${imagePath}" alt="${watch.nom || 'Montre'}" class="main-img">
-                        <img src="${imageHoverPath}" alt="${watch.nom || 'Montre'}" class="hover-img">
-                        ${reduction > 0 ? `<div class="product-tag">-${reduction}%</div>` : ''}
+                        <img src="${imagePath}" alt="${watch.nom}">
+                        ${watch.reduction > 0 ? `<div class="product-tag">-${watch.reduction}%</div>` : ''}
                     </div>
                     <div class="product-info">
-                        <h3 class="product-name">${watch.nom || 'Montre sans nom'}</h3>
+                        <h3 class="product-name">${watch.nom}</h3>
                         <div class="product-price">
-                            ${reduction > 0 
-                                ? `<span class="original-price">${prix.toFixed(2)} ${devise}</span>
-                                   <span class="discount-price">${displayPrice.toFixed(2)} ${devise}</span>`
-                                : `<span class="discount-price">${prix.toFixed(2)} ${devise}</span>`
+                            ${watch.reduction > 0 
+                                ? `<span class="original-price">${watch.prix} ${watch.devise}</span>
+                                   <span class="discount-price">${displayPrice.toFixed(2)} ${watch.devise}</span>`
+                                : `<span class="discount-price">${watch.prix} ${watch.devise}</span>`
                             }
                         </div>
                     </div>
@@ -282,10 +256,5 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         productsContainer.innerHTML = html;
-    }
-    
-    // Au lieu de fetch, utiliser directement la fonction de filtrage local
-    function filterAndDisplayWatches() {
-        filterAndDisplayWatchesLocally();
     }
 });
