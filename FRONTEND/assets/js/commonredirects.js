@@ -133,10 +133,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function applyUrlCategoryFilter(categoryName) {
         // Correspondance entre noms dans l'URL et IDs de catégories
         const categoryMap = {
-            'luxury': 4,    // ID pour Luxe
-            'sport': 3,     // ID pour Sport
-            'diving': 1,    // ID pour Plongée
-            'dress': 2,     // ID pour Costume
+            'luxury': 1,    // ID pour Luxe
+            'sport': 2,     // ID pour Sport
+            'diving': 3,    // ID pour Plongée
+            'dress': 4,     // ID pour Costume
             'new': 5        // ID pour Nouveautés
         };
         
