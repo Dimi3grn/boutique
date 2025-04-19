@@ -84,6 +84,6 @@ document.addEventListener('DOMContentLoaded', function() {
 const featuredButton = document.querySelector("#featured-button");
 if (featuredButton) {
   featuredButton.addEventListener('click', () => {
-    window.location.href = 'product.html?id=6'; // Redirect to product page with ID 6
+    window.location.href = 'product.html?id=1'; // Redirect to product page with ID 6
   });
 }

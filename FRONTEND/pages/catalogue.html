@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalogue | Tempora</title>
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/catalogue.css">
+</head>
+<body>
+    <div class="menu-overlay"></div>
+    <div class="side-menu">
+        <ul class="menu-links">
+            <li><a href="landing_page.html">Accueil</a></li>
+            <li><a href="catalogue.html">Catalogue</a></li>
+            <li><a href="#">Montres de luxe</a></li>
+            <li><a href="#">Montres sport</a></li>
+            <li><a href="#">Montres classiques</a></li>
+            <li><a href="#">Nouveautés</a></li>
+            <li><a href="#">Promotions</a></li>
+            <li><a href="#">Notre histoire</a></li>
+            <li><a href="#">Service client</a></li>
+        </ul>
+    </div>
+    <main>
+        <header>
+            <div class="left">
+                <div class="menu">
+                    <div class="hamburger-button">
+                        <div class="hamburger-line"></div>
+                        <div class="hamburger-line"></div>
+                        <div class="hamburger-line"></div>
+                    </div>
+                    <p>Menu</p>
+                </div>
+                <div class="search-container">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" class="search-input" placeholder="Rechercher..." aria-label="Search" id="search-input">
+                </div>
+            </div>
+            <div class="title">
+                <h1><a href="landing_page.html">Tempora</a></h1>
+            </div>
+            <div class="right">
+                <div class="contact">
+                    <p>Contactez-nous</p>
+                </div>
+                <div class="svgdiv">
+                    <div class="heart">
+                        <img src="../assets/svg/heart.svg" alt="Heart">
+                    </div>
+                    <div class="user">
+                        <img src="../assets/svg/profile.svg" alt="User">
+                    </div>
+                    <div class="cart">
+                        <img src="../assets/svg/cart.svg" alt="Cart">
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="catalogue-container">
+            <div class="filters-section">
+                <h2>Filtres</h2>
+                <div class="filter-group">
+                    <h3>Catégories</h3>
+                    <div class="filter-options" id="category-filters">
+                        <!-- Les catégories seront chargées ici via JavaScript -->
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <h3>Prix</h3>
+                    <div class="price-range">
+                        <input type="range" id="price-filter" min="0" max="50000" step="1000" value="50000">
+                        <div class="price-values">
+                            <span>0 €</span>
+                            <span id="price-value">50000 €</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="filter-group">
+                    <h3>Promotions</h3>
+                    <div class="filter-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="promo-filter">
+                            <span class="checkmark"></span>
+                            Montres en promotion
+                        </label>
+                    </div>
+                </div>
+                <button id="apply-filters" class="apply-filters-btn">Appliquer les filtres</button>
+            </div>
+            
+            <div class="products-section">
+                <div class="sort-container">
+                    <label for="sort-select">Trier par:</label>
+                    <select id="sort-select">
+                        <option value="name-asc">Nom (A-Z)</option>
+                        <option value="name-desc">Nom (Z-A)</option>
+                        <option value="price-asc">Prix croissant</option>
+                        <option value="price-desc">Prix décroissant</option>
+                    </select>
+                </div>
+                
+                <div class="products-grid" id="products-container">
+                    <!-- Les produits seront chargés ici via JavaScript -->
+                    <p class="loading-message">Chargement des produits...</p>
+                </div>
+                
+                <div class="pagination" id="pagination-container">
+                    <!-- La pagination sera générée ici via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="../assets/js/front.js"></script>
+    <script src="../assets/js/catalogue.js"></script>
+</body>
+</html>

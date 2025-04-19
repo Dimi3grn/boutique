@@ -1,0 +1,314 @@
+/* catalogue.css */
+.catalogue-container {
+    display: flex;
+    max-width: 1400px;
+    margin: 100px auto 50px;
+    padding: 0 20px;
+    gap: 30px;
+}
+
+.filters-section {
+    width: 250px;
+    flex-shrink: 0;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+    position: sticky;
+    top: 100px;
+    height: fit-content;
+}
+
+.filters-section h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.filter-group {
+    margin-bottom: 25px;
+}
+
+.filter-group h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.filter-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 30px;
+    cursor: pointer;
+    font-size: 14px;
+    user-select: none;
+}
+
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    left: 0;
+    height: 18px;
+    width: 18px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+    background-color: #f1f1f1;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+    background-color: #000;
+    border-color: #000;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkbox-container .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.price-range {
+    margin-top: 10px;
+}
+
+.price-range input {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.price-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #666;
+}
+
+.apply-filters-btn {
+    width: 100%;
+    background-color: #000;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 15px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.apply-filters-btn:hover {
+    background-color: #333;
+}
+
+.products-section {
+    flex-grow: 1;
+}
+
+.sort-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.sort-container label {
+    font-size: 14px;
+}
+
+.sort-container select {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 25px;
+}
+
+.product-card {
+    background-color: #fff;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.product-image {
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+    position: relative;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.05);
+}
+
+.product-tag {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #d32f2f;
+    color: white;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 3px;
+    font-weight: 500;
+}
+
+.product-info {
+    padding: 15px;
+}
+
+.product-name {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.product-price {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #000;
+}
+
+.product-price .original-price {
+    text-decoration: line-through;
+    color: #999;
+    font-size: 14px;
+}
+
+.product-price .discount-price {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+    gap: 5px;
+}
+
+.pagination-item {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.pagination-item:hover {
+    background-color: #f5f5f5;
+}
+
+.pagination-item.active {
+    background-color: #000;
+    color: white;
+    border-color: #000;
+}
+
+.loading-message {
+    text-align: center;
+    padding: 50px;
+    grid-column: 1 / -1;
+    color: #666;
+}
+
+.no-products {
+    text-align: center;
+    padding: 50px;
+    grid-column: 1 / -1;
+    color: #666;
+}
+
+/* Responsive design */
+@media (max-width: 992px) {
+    .catalogue-container {
+        flex-direction: column;
+    }
+    
+    .filters-section {
+        width: 100%;
+        position: static;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .sort-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
