@@ -232,3 +232,20 @@ exports.filterWatches = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
+
+// Get all colors
+exports.getAllColors = async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM colors');
+        
+        res.status(200).json({
+            message: "Colors found",
+            colors: rows
+        });
+        
+    } catch (error) {
+        console.error('Error fetching colors:', error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};

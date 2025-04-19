@@ -1,8 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const url = "http://localhost:3000/";
-    const backendUrl = "http://localhost:3000"; // Défini au niveau global
+    const backendUrl = "http://localhost:3000";
     const productsContainer = document.getElementById('products-container');
     const categoryFiltersContainer = document.getElementById('category-filters');
+    const colorFiltersContainer = document.getElementById('color-filters'); // Nouvel élément pour les filtres de couleurs
     const priceFilter = document.getElementById('price-filter');
     const priceValue = document.getElementById('price-value');
     const promoFilter = document.getElementById('promo-filter');
@@ -12,9 +13,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let allWatches = [];
     let categories = [];
+    let colors = []; // Nouvelle variable pour stocker les couleurs
     let currentFilters = {
         categories: [],
-        maxPrice: 50000,
+        colors: [], // Ajout de la propriété colors
+        maxPrice: 5000,
         promo: false,
         search: '',
         sort: 'name-asc'
@@ -29,19 +32,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Appliquer les filtres
     applyFiltersBtn.addEventListener('click', function() {
         // Récupérer les catégories cochées
-       
         currentFilters.categories = [];
-        
         document.querySelectorAll('#category-filters input:checked').forEach(checkbox => {
             currentFilters.categories.push(parseInt(checkbox.value));
         });
-   
+        
+        // Récupérer les couleurs cochées
+        currentFilters.colors = [];
+        document.querySelectorAll('#color-filters input:checked').forEach(checkbox => {
+            currentFilters.colors.push(parseInt(checkbox.value));
+        });
         
         currentFilters.promo = promoFilter.checked;
         currentFilters.maxPrice = parseInt(priceFilter.value);
-        console.log(currentFilters);
-        filterAndDisplayWatches();
         
+        filterAndDisplayWatches();
     });
     
     // Recherche
@@ -81,6 +86,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 categories = data.categories;
                 displayCategoryFilters();
             }
+            
+            // Récupérer les couleurs
+            return fetch(`${url}api/colors`);
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.colors) {
+                colors = data.colors;
+                displayColorFilters();
+            }
         })
         .catch(error => {
             console.error('Erreur lors du chargement des données:', error);
@@ -109,90 +124,76 @@ document.addEventListener('DOMContentLoaded', function() {
         categoryFiltersContainer.innerHTML = html;
     }
     
+    // Afficher les couleurs dans les filtres
+    function displayColorFilters() {
+        let html = '';
+        
+        colors.forEach(color => {
+            const colorCode = color.hex_code || color.code || "#CCCCCC";
+            const colorName = color.name || color.nom || "Couleur";
+            
+            html += `
+                <label class="color-filter-container">
+                    <input type="checkbox" value="${color.color_id || color.id}">
+                    <span class="color-swatch" style="background-color: ${colorCode};" title="${colorName}"></span>
+                    <span class="color-name">${colorName}</span>
+                </label>
+            `;
+        });
+        
+        colorFiltersContainer.innerHTML = html;
+    }
+    
     // Filtrer et afficher les montres
-    async function filterAndDisplayWatches() {
+    function filterAndDisplayWatches() {
+        // Construction des paramètres pour l'API
+        const params = new URLSearchParams();
+        
+        if (currentFilters.categories.length > 0) {
+            params.append('categories', currentFilters.categories.join(','));
+        }
+        
+        if (currentFilters.colors.length > 0) {
+            params.append('colors', currentFilters.colors.join(','));
+        }
+        
+        params.append('maxPrice', currentFilters.maxPrice);
+        
+        if (currentFilters.promo) {
+            params.append('promo', 'true');
+        }
+        
+        if (currentFilters.search) {
+            params.append('search', currentFilters.search);
+        }
+        
+        params.append('sort', currentFilters.sort);
+        
         // Afficher un message de chargement
         productsContainer.innerHTML = '<p class="loading-message">Chargement des produits...</p>';
         
-        try {
-            // Construire l'URL de l'API avec les paramètres de filtre
-            const url = "http://localhost:3000/api/filter-watches";
-            const params = new URLSearchParams();
-            
-            // Ajouter les catégories sélectionnées
-            if (currentFilters.categories.length > 0) {
-                params.append('categories', currentFilters.categories.join(','));
+        // Appel à l'API pour récupérer les produits filtrés
+        fetch(`${url}api/watches/filter?${params.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.watches) {
+                displayWatches(data.watches);
+            } else {
+                productsContainer.innerHTML = `
+                    <div class="no-products">
+                        <p>Aucun produit ne correspond à vos critères.</p>
+                    </div>
+                `;
             }
-            
-            // Ajouter les filtres de prix
-            if (currentFilters.maxPrice) {
-                params.append('priceMax', currentFilters.maxPrice);
-            }
-            
-            if (currentFilters.minPrice) {
-                params.append('priceMin', currentFilters.minPrice);
-            }
-            
-            // Ajouter le filtre de promotion
-            if (currentFilters.promo) {
-                params.append('hasDiscount', 'true');
-            }
-            
-            // Construire l'URL complète
-            const apiUrl = `${url}?${params.toString()}`;
-            
-            // Appeler l'API
-            const response = await fetch(apiUrl);
-            
-            if (!response.ok) {
-                throw new Error(`Erreur HTTP: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            let filteredWatches = data.watches;
-            
-            // Le filtre de recherche est géré côté client car plus flexible
-            if (currentFilters.search) {
-                const searchTerm = currentFilters.search.toLowerCase();
-                filteredWatches = filteredWatches.filter(watch => 
-                    watch.nom.toLowerCase().includes(searchTerm) || 
-                    watch.marque.toLowerCase().includes(searchTerm)
-                );
-            }
-            
-            // Tri également géré côté client
-            filteredWatches = sortWatches(filteredWatches, currentFilters.sort);
-            
-            // Afficher les montres
-            displayWatches(filteredWatches);
-            
-        } catch (error) {
-            console.error('Erreur lors du filtrage des montres:', error);
-            productsContainer.innerHTML = `<p class="error-message">Erreur lors du chargement des produits: ${error.message}</p>`;
-        }
-    }
-    // Trier les montres
-    function sortWatches(watches, sortMethod) {
-        switch (sortMethod) {
-            case 'name-asc':
-                return watches.sort((a, b) => a.nom.localeCompare(b.nom));
-            case 'name-desc':
-                return watches.sort((a, b) => b.nom.localeCompare(a.nom));
-            case 'price-asc':
-                return watches.sort((a, b) => {
-                    const priceA = a.reduction > 0 ? a.prix * (1 - a.reduction/100) : a.prix;
-                    const priceB = b.reduction > 0 ? b.prix * (1 - b.reduction/100) : b.prix;
-                    return priceA - priceB;
-                });
-            case 'price-desc':
-                return watches.sort((a, b) => {
-                    const priceA = a.reduction > 0 ? a.prix * (1 - a.reduction/100) : a.prix;
-                    const priceB = b.reduction > 0 ? b.prix * (1 - b.reduction/100) : b.prix;
-                    return priceB - priceA;
-                });
-            default:
-                return watches;
-        }
+        })
+        .catch(error => {
+            console.error('Erreur lors du filtrage des produits:', error);
+            productsContainer.innerHTML = `
+                <div class="no-products">
+                    <p>Une erreur est survenue lors du filtrage des produits.</p>
+                </div>
+            `;
+        });
     }
     
     // Fonction pour obtenir le chemin complet des images
@@ -228,20 +229,22 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Formatter le chemin de l'image
             const imagePath = getFullImagePath(watch.image1);
+            const imageHoverPath = watch.image2 ? getFullImagePath(watch.image2) : imagePath;
             
             html += `
                 <div class="product-card" onclick="window.location.href='product.html?id=${watch.montre_id}'">
                     <div class="product-image">
-                        <img src="${imagePath}" alt="${watch.nom}">
+                        <img src="${imagePath}" alt="${watch.nom}" class="main-img">
+                        <img src="${imageHoverPath}" alt="${watch.nom}" class="hover-img">
                         ${watch.reduction > 0 ? `<div class="product-tag">-${watch.reduction}%</div>` : ''}
                     </div>
                     <div class="product-info">
                         <h3 class="product-name">${watch.nom}</h3>
                         <div class="product-price">
                             ${watch.reduction > 0 
-                                ? `<span class="original-price">${watch.prix} ${watch.devise}</span>
-                                   <span class="discount-price">${displayPrice.toFixed(2)} ${watch.devise}</span>`
-                                : `<span class="discount-price">${watch.prix} ${watch.devise}</span>`
+                                ? `<span class="original-price">${watch.prix} ${watch.devise || '€'}</span>
+                                   <span class="discount-price">${displayPrice.toFixed(2)} ${watch.devise || '€'}</span>`
+                                : `<span class="discount-price">${watch.prix} ${watch.devise || '€'}</span>`
                             }
                         </div>
                     </div>
