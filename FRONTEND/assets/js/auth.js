@@ -57,15 +57,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch(`${baseUrl}api/auth/login`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ email, password }),
-                credentials: 'include' // Important for cookies
+                body: JSON.stringify({ email, password })
             });
             
             const data = await response.json();
             
             if (response.ok) {
+                // Store token in localStorage
+                localStorage.setItem('authToken', data.token);
+                
                 // Store user info in localStorage for client-side auth state
                 localStorage.setItem('user', JSON.stringify({
                     id: data.user.id,
@@ -74,7 +76,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }));
                 
                 // Redirect to home page or dashboard
-                window.location.href = 'landing_page.html';
+                const returnTo = getReturnUrl() || 'landing_page.html';
+                window.location.href = returnTo;
             } else {
                 showError(data.message || "Échec de la connexion. Veuillez vérifier vos informations.");
             }
@@ -90,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch(`${baseUrl}api/auth/register`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ username, email, password })
             });
@@ -111,20 +114,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to logout user
     function logoutUser() {
-        fetch(`${baseUrl}api/auth/logout`, {
-            method: 'POST',
-            credentials: 'include' // Important for cookies
-        })
-        .then(() => {
-            // Clear local storage
-            localStorage.removeItem('user');
-            
-            // Redirect to login page
-            window.location.href = 'login.html?logout=true';
-        })
-        .catch(error => {
-            console.error('Logout error:', error);
-        });
+        // Clear localStorage
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        
+        // Redirect to login page
+        window.location.href = 'login.html?logout=true';
     }
     
     // Function to check authentication state
@@ -142,28 +137,35 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update UI based on auth state
         const user = JSON.parse(localStorage.getItem('user'));
+        const token = localStorage.getItem('authToken');
+        
         updateAuthUI(user);
         
-        // Verify with backend that session is still valid
-        fetch(`${baseUrl}api/auth/check`, {
-            method: 'GET',
-            credentials: 'include'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (!data.authenticated && user) {
-                // Session expired, clear local storage
-                localStorage.removeItem('user');
-                updateAuthUI(null);
-            } else if (data.authenticated && !user) {
-                // User authenticated but no local storage - update it
-                localStorage.setItem('user', JSON.stringify(data.user));
-                updateAuthUI(data.user);
-            }
-        })
-        .catch(error => {
-            console.error('Auth check error:', error);
-        });
+        // Only verify with backend if we have a token
+        if (token) {
+            fetch(`${baseUrl}api/auth/check`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.authenticated && user) {
+                    // Session expired, clear local storage
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('user');
+                    updateAuthUI(null);
+                } else if (data.authenticated && !user) {
+                    // User authenticated but no local storage - update it
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    updateAuthUI(data.user);
+                }
+            })
+            .catch(error => {
+                console.error('Auth check error:', error);
+            });
+        }
     }
     
     // Function to update UI based on auth state
@@ -173,7 +175,36 @@ document.addEventListener('DOMContentLoaded', function() {
         if (profileIcon && user) {
             // If authenticated, could change the icon or add a small indicator
             profileIcon.setAttribute('title', `Connecté en tant que: ${user.username}`);
+            
+            // Add visual indicator
+            const userDiv = document.querySelector('.user');
+            if (userDiv && !userDiv.querySelector('.login-indicator')) {
+                const indicator = document.createElement('div');
+                indicator.className = 'login-indicator';
+                indicator.style.width = '8px';
+                indicator.style.height = '8px';
+                indicator.style.backgroundColor = '#4CAF50';
+                indicator.style.borderRadius = '50%';
+                indicator.style.position = 'absolute';
+                indicator.style.top = '0';
+                indicator.style.right = '0';
+                userDiv.style.position = 'relative';
+                userDiv.appendChild(indicator);
+            }
+        } else if (profileIcon) {
+            // Not logged in
+            profileIcon.setAttribute('title', 'Se connecter / S\'inscrire');
+            
+            // Remove indicator if it exists
+            const indicator = document.querySelector('.login-indicator');
+            if (indicator) indicator.remove();
         }
+    }
+    
+    // Function to get return URL from query parameter
+    function getReturnUrl() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('returnTo');
     }
     
     // Function to show error message
@@ -202,7 +233,11 @@ document.addEventListener('DOMContentLoaded', function() {
             // Insert after h2
             const authBox = document.querySelector('.auth-box');
             const heading = authBox.querySelector('h2');
-            authBox.insertBefore(newSuccessElement, heading.nextSibling);
+            if (heading) {
+                authBox.insertBefore(newSuccessElement, heading.nextSibling);
+            } else {
+                authBox.prepend(newSuccessElement);
+            }
             
             newSuccessElement.textContent = message;
             newSuccessElement.classList.add('show');

@@ -94,23 +94,17 @@ exports.login = async (req, res) => {
         
         // Generate JWT token
         const token = jwt.sign(
-            { id: user.id },
+            { id: user.user_id }, // Assurez-vous d'utiliser le bon nom de colonne pour l'ID
             JWT_SECRET,
             { expiresIn: JWT_EXPIRES_IN }
         );
         
-        // Set token as HTTP-only cookie
-        res.cookie('token', token, {
-            httpOnly: true,
-            maxAge: 24 * 60 * 60 * 1000, // 24 hours
-            sameSite: 'strict',
-            secure: process.env.NODE_ENV === 'production'
-        });
-        
+        // Retourner le token directement dans la réponse pour utilisation avec localStorage
         res.status(200).json({
             message: "Connexion réussie",
+            token: token, // Le token à stocker dans localStorage
             user: {
-                id: user.id,
+                id: user.user_id,
                 username: user.username,
                 email: user.email
             }
@@ -123,8 +117,8 @@ exports.login = async (req, res) => {
 };
 
 exports.logout = (req, res) => {
-    // Clear token cookie
-    res.clearCookie('token');
+    // Puisque nous utilisons localStorage, il n'y a pas besoin de nettoyer les cookies côté serveur
+    // La déconnexion sera gérée côté client en supprimant le token du localStorage
     res.status(200).json({ message: "Déconnexion réussie" });
 };
 
@@ -135,7 +129,7 @@ exports.getProfile = async (req, res) => {
         
         // Get user data
         const [users] = await pool.query(
-            'SELECT id, username, email, created_at FROM users WHERE id = ?', 
+            'SELECT user_id, username, email, created_at FROM users WHERE user_id = ?', 
             [userId]
         );
         
@@ -158,31 +152,27 @@ exports.getProfile = async (req, res) => {
 
 exports.checkAuth = (req, res) => {
     try {
-        // Get token from cookie
-        const token = req.cookies.token;
+        // Le middleware verifyToken a déjà vérifié le token et défini req.userId
+        // Donc si on arrive ici, c'est que l'authentification est valide
         
-        if (!token) {
-            return res.status(200).json({ authenticated: false });
-        }
-        
-        // Verify token
-        const decoded = jwt.verify(token, JWT_SECRET);
-        
-        // Attach user ID to request
-        req.userId = decoded.id;
-        
-        // Get user data (this could be optimized by using Redis or similar for caching)
+        // Optionnel: récupérer les informations utilisateur
         pool.query(
-            'SELECT id, username, email FROM users WHERE id = ?', 
-            [decoded.id],
+            'SELECT user_id, username, email FROM users WHERE user_id = ?', 
+            [req.userId],
             (error, results) => {
                 if (error) {
                     console.error('Database error during auth check:', error);
-                    return res.status(200).json({ authenticated: false });
+                    return res.status(500).json({ 
+                        authenticated: false,
+                        message: "Erreur lors de la récupération des données utilisateur" 
+                    });
                 }
                 
                 if (results.length === 0) {
-                    return res.status(200).json({ authenticated: false });
+                    return res.status(404).json({ 
+                        authenticated: false,
+                        message: "Utilisateur non trouvé" 
+                    });
                 }
                 
                 const user = results[0];
@@ -190,7 +180,7 @@ exports.checkAuth = (req, res) => {
                 res.status(200).json({
                     authenticated: true,
                     user: {
-                        id: user.id,
+                        id: user.user_id,
                         username: user.username,
                         email: user.email
                     }
@@ -200,6 +190,9 @@ exports.checkAuth = (req, res) => {
         
     } catch (error) {
         console.error('Auth check error:', error);
-        res.status(200).json({ authenticated: false });
+        res.status(401).json({ 
+            authenticated: false,
+            message: "Session invalide ou expirée" 
+        });
     }
 };

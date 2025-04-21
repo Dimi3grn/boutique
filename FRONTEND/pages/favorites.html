@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Details | Tempora</title>
+    <title>Mes Favoris | Tempora</title>
     <link rel="stylesheet" href="../assets/css/main.css">
-    <link rel="stylesheet" href="../assets/css/product.css">
+    <link rel="stylesheet" href="../assets/css/catalogue.css">
+    <link rel="stylesheet" href="../assets/css/favorites.css">
 </head>
 <body>
     <div class="menu-overlay"></div>
@@ -39,7 +40,7 @@
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <input type="text" class="search-input" placeholder="Search..." aria-label="Search">
+                    <input type="text" class="search-input" placeholder="Rechercher..." aria-label="Search">
                 </div>
             </div>
             <div class="title">
@@ -63,14 +64,19 @@
             </div>
         </header>
         
-        <div class="product-container" id="product-container">
-            <!-- Product details will be loaded here -->
-            <p class="loading-text">Loading product details...</p>
+        <div class="favorites-container">
+            <div class="favorites-header">
+                <h2>Mes Favoris</h2>
+                <p>Toutes vos montres préférées en un seul endroit</p>
+            </div>
+            
+            <div class="favorites-grid" id="favorites-container">
+                <!-- Favorites will be loaded here via JavaScript -->
+                <p class="loading-message">Chargement de vos favoris...</p>
+            </div>
         </div>
     </main>
     <script src="../assets/js/front.js"></script>
-    <!-- Importez d'abord les fonctions de favoris qui sont utilisées par product.js -->
     <script src="../assets/js/favorites.js"></script>
-    <script src="../assets/js/product.js"></script>
 </body>
 </html>

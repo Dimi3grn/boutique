@@ -5,22 +5,33 @@ const JWT_SECRET = process.env.JWT_SECRET || 'tempora-secret-key';
 
 exports.verifyToken = (req, res, next) => {
     try {
-        // Get token from cookie
-        const token = req.cookies.token;
+        // Récupérer le token depuis l'en-tête Authorization
+        const authHeader = req.headers['authorization'];
         
-        if (!token) {
+        if (!authHeader) {
             return res.status(401).json({ message: "Authentification requise" });
         }
         
-        // Verify token
+        // Format attendu: "Bearer TOKEN"
+        const parts = authHeader.split(' ');
+        if (parts.length !== 2 || parts[0] !== 'Bearer') {
+            return res.status(401).json({ message: "Format d'autorisation invalide" });
+        }
+        
+        const token = parts[1];
+        
+        // Vérifier et décoder le token
         const decoded = jwt.verify(token, JWT_SECRET);
         
-        // Attach user ID to request
+        // Attacher l'ID utilisateur à la requête pour utilisation ultérieure
         req.userId = decoded.id;
         
         next();
     } catch (error) {
         console.error('Token verification error:', error);
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: "Session expirée, veuillez vous reconnecter" });
+        }
         res.status(401).json({ message: "Token invalide" });
     }
 };
