@@ -5,15 +5,20 @@
   "scripts": {
     "start": "supervisor app.js",
     "setup-db": "node scripts/setup-database.js",
-    "import-data": "node scripts/import-data.js"
+    "import-data": "node scripts/import-data.js",
+    "setup-auth": "node scripts/setup-auth.js"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "express": "^4.21.2",
-    "mysql2": "^3.14.0"
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.14.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "supervisor": "^0.12.0"
