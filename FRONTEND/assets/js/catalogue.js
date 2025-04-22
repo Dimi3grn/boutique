@@ -248,7 +248,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Tri également géré côté client
             filteredWatches = sortWatches(filteredWatches, currentFilters.sort);
-            
             // Afficher les montres
             displayWatches(filteredWatches);
             
@@ -317,12 +316,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const imagePath = getFullImagePath(watch.image1);
             
             html += `
-                <div class="product-card" onclick="window.location.href='product.html?id=${watch.montre_id}'">
-                    <div class="product-image">
-                        <img src="${imagePath}" alt="${watch.nom}">
+                <div class="product-card">
+                    <div class="product-image" onclick="window.location.href='product.html?id=${watch.montre_id}'">
+                        <img src="${imagePath}" alt="${watch.nom}" class="main-img">
+                        ${watch.image2 ? `<img src="${getFullImagePath(watch.image2)}" alt="${watch.nom}" class="hover-img">` : ''}
                         ${watch.reduction > 0 ? `<div class="product-tag">-${watch.reduction}%</div>` : ''}
                     </div>
-                    <div class="product-info">
+                    <div class="favorite-btn" onclick="event.stopPropagation(); toggleFavorite(${watch.montre_id}, this)" title="Ajouter aux favoris" data-product-id="${watch.montre_id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                    </div>
+                    <div class="product-info" onclick="window.location.href='product.html?id=${watch.montre_id}'">
                         <h3 class="product-name">${watch.nom}</h3>
                         <div class="product-price">
                             ${watch.reduction > 0 
@@ -337,5 +342,216 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         productsContainer.innerHTML = html;
+        
+        // Check favorites status for all products on the page
+        checkAllFavorites();
+    }
+    
+    // Function to check favorites status for all products
+    function checkAllFavorites() {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = localStorage.getItem('authToken');
+        
+        if (!user || !token) {
+            return; // Not logged in, don't check
+        }
+        
+        // Get all favorite buttons
+        const favoriteButtons = document.querySelectorAll('.favorite-btn');
+        
+        favoriteButtons.forEach(button => {
+            const watchId = button.getAttribute('data-product-id');
+            if (watchId) {
+                checkIsFavorite(watchId, button);
+            }
+        });
+    }
+    
+    // Function to check if a product is in favorites
+    function checkIsFavorite(watchId, heartElement) {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const token = localStorage.getItem('authToken');
+        
+        if (!user || !token) {
+            return; // Not logged in, don't check
+        }
+        
+        fetch(`${url}api/favorites/check/${watchId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    // Session expired, clear local storage
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('authToken');
+                    return { isFavorite: false };
+                }
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data && data.isFavorite) {
+                heartElement.classList.add('favorited');
+                heartElement.setAttribute('title', 'Retirer des favoris');
+            } else {
+                heartElement.classList.remove('favorited');
+                heartElement.setAttribute('title', 'Ajouter aux favoris');
+            }
+        })
+        .catch(error => {
+            console.error('Error checking favorite status:', error);
+            // Just make it not favorited in case of any error
+            heartElement.classList.remove('favorited');
+            heartElement.setAttribute('title', 'Ajouter aux favoris');
+        });
     }
 });
+
+// Global function to toggle favorite
+function toggleFavorite(watchId, heartElement) {
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = localStorage.getItem('authToken');
+    const url = "http://localhost:3000/";
+    
+    if (!user || !token) {
+        // Not logged in, redirect to login
+        window.location.href = `login.html?returnTo=catalogue.html`;
+        return;
+    }
+    
+    // Check if currently a favorite (based on element class)
+    const isFavorite = heartElement.classList.contains('favorited');
+    
+    if (isFavorite) {
+        // Remove from favorites
+        removeFromFavorites(watchId, heartElement);
+    } else {
+        // Add to favorites
+        addToFavorites(watchId, heartElement);
+    }
+}
+
+// Add to favorites
+function addToFavorites(watchId, heartElement) {
+    const token = localStorage.getItem('authToken');
+    const url = "http://localhost:3000/";
+    
+    fetch(`${url}api/favorites`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ watchId })
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 401) {
+                // Session expired, clear local storage and redirect
+                localStorage.removeItem('user');
+                localStorage.removeItem('authToken');
+                showMessage('error', 'Session expirée, veuillez vous reconnecter');
+                setTimeout(() => {
+                    window.location.href = `login.html?returnTo=catalogue.html`;
+                }, 2000);
+                throw new Error('Session expirée');
+            }
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data && data.message === "Watch added to favorites") {
+            // Update the UI
+            heartElement.classList.add('favorited');
+            heartElement.setAttribute('title', 'Retirer des favoris');
+            
+            // Show confirmation
+            showMessage('success', 'Ajouté aux favoris !');
+        } else {
+            throw new Error(data.message || 'Échec de l\'ajout aux favoris');
+        }
+    })
+    .catch(error => {
+        console.error('Error adding to favorites:', error);
+        if (!error.message.includes('Session expirée')) {
+            showMessage('error', 'Impossible d\'ajouter aux favoris');
+        }
+    });
+}
+
+// Remove from favorites
+function removeFromFavorites(watchId, heartElement) {
+    const token = localStorage.getItem('authToken');
+    const url = "http://localhost:3000/";
+    
+    fetch(`${url}api/favorites/${watchId}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 401) {
+                // Session expired, clear local storage and redirect
+                localStorage.removeItem('user');
+                localStorage.removeItem('authToken');
+                showMessage('error', 'Session expirée, veuillez vous reconnecter');
+                setTimeout(() => {
+                    window.location.href = `login.html?returnTo=catalogue.html`;
+                }, 2000);
+                throw new Error('Session expirée');
+            }
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data && data.message === "Watch removed from favorites") {
+            // Update the UI
+            heartElement.classList.remove('favorited');
+            heartElement.setAttribute('title', 'Ajouter aux favoris');
+            
+            // Show confirmation
+            showMessage('success', 'Retiré des favoris');
+        } else {
+            throw new Error(data.message || 'Échec de la suppression des favoris');
+        }
+    })
+    .catch(error => {
+        console.error('Error removing from favorites:', error);
+        if (!error.message.includes('Session expirée')) {
+            showMessage('error', 'Impossible de retirer des favoris');
+        }
+    });
+}
+
+// Function to show message
+function showMessage(type, message) {
+    // Create message element if it doesn't exist
+    let messageElement = document.querySelector('.message-toast');
+    
+    if (!messageElement) {
+        messageElement = document.createElement('div');
+        messageElement.className = 'message-toast';
+        document.body.appendChild(messageElement);
+    }
+    
+    // Set message content
+    messageElement.textContent = message;
+    messageElement.className = `message-toast ${type}`;
+    
+    // Show message
+    messageElement.classList.add('visible');
+    
+    // Hide message after delay
+    setTimeout(() => {
+        messageElement.classList.remove('visible');
+    }, 3000);
+}
