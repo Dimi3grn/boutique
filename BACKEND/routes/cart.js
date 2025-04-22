@@ -25,6 +25,7 @@ router.get("/check/:watchId", controllers.checkIsInCart);
 router.get("/count", controllers.getCartCount);
 
 // Clear cart (remove all items)
+// Make sure this route is defined BEFORE /:watchId route to avoid conflicts
 router.delete("/clear", controllers.clearCart);
 
 module.exports = router;

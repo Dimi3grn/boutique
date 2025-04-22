@@ -1,3 +1,4 @@
+// Modified cart.js
 document.addEventListener('DOMContentLoaded', function() {
     const baseUrl = "http://localhost:3000/";
     const backendUrl = "http://localhost:3000";
@@ -186,13 +187,28 @@ document.addEventListener('DOMContentLoaded', function() {
     window.clearCart = function() {
         const token = localStorage.getItem('authToken');
         
+        // Make sure we have a token
+        if (!token) {
+            showMessage('error', 'Vous devez être connecté pour vider le panier');
+            setTimeout(() => {
+                window.location.href = 'login.html?returnTo=cart.html';
+            }, 2000);
+            return;
+        }
+        
+        // Log for debugging
+        console.log('Attempting to clear cart with token:', token);
+        
         fetch(`${baseUrl}api/cart/clear`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${token}`
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
         })
         .then(response => {
+            console.log('Clear cart response status:', response.status);
+            
             if (!response.ok) {
                 if (response.status === 401) {
                     // Session expired, clear local storage and redirect
@@ -209,6 +225,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(data => {
+            console.log('Clear cart response data:', data);
+            
             if (data.message === "Cart cleared successfully") {
                 // Update the cart count indicator
                 updateCartCountIndicator();

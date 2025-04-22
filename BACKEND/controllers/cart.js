@@ -213,13 +213,19 @@ exports.getCartCount = async (req, res) => {
 // Clear cart (remove all items)
 exports.clearCart = async (req, res) => {
     try {
+        
         const userId = req.userId; // From auth middleware
         
+        // Log for debugging
+        console.log(`Clearing cart for user ${userId}`);
+        
         // Delete all cart items for this user
-        await pool.query(
+        const [result] = await pool.query(
             'DELETE FROM panier WHERE user_id = ?',
             [userId]
         );
+        
+        console.log(`Deleted ${result.affectedRows} items from cart`);
         
         res.status(200).json({
             message: "Cart cleared successfully"
