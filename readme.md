@@ -2,8 +2,6 @@
 
 Tempora est une boutique en ligne de montres de luxe, avec une interface utilisateur moderne et un backend robuste pour gérer les produits, les utilisateurs, les favoris et le panier d'achat.
 
-![Tempora](https://i.imgur.com/EXAMPLE.png)
-
 ## 📋 Table des matières
 
 - [Aperçu du projet](#aperçu-du-projet)
