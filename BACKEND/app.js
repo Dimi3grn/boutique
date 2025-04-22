@@ -20,11 +20,13 @@ app.use('/static', express.static(path.join(__dirname, 'public')));
 // Routes
 const watchesRoutes = require("./routes/watches");
 const authRoutes = require("./routes/auth");
-const favoritesRoutes = require("./routes/favorites"); // New favorites routes
+const favoritesRoutes = require("./routes/favorites");
+const cartRoutes = require("./routes/cart"); // New cart routes
 
 app.use("/api", watchesRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/favorites", favoritesRoutes); // Add favorites routes
+app.use("/api/favorites", favoritesRoutes);
+app.use("/api/cart", cartRoutes); // Add cart routes
 
 app.listen(port, () => {
     console.log(`Server started on http://localhost:${port}`);

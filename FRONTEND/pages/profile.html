@@ -6,6 +6,7 @@
     <title>Mon Profil | Tempora</title>
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="../assets/css/auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="menu-overlay"></div>
@@ -74,6 +75,15 @@
                     <div class="email" id="profile-email">Chargement...</div>
                 </div>
                 
+                <div class="profile-links">
+                    <a href="favorites.html" class="profile-link">
+                        <i class="fas fa-heart"></i> Mes Favoris
+                    </a>
+                    <a href="cart.html" class="profile-link">
+                        <i class="fas fa-shopping-cart"></i> Mon Panier
+                    </a>
+                </div>
+                
                 <div class="form-action">
                     <button id="logout-button" class="logout-button">Se déconnecter</button>
                 </div>
@@ -83,6 +93,7 @@
     <script src="../assets/js/front.js"></script>
     <script src="../assets/js/auth.js"></script>
     <script src="../assets/js/commont_fav.js"></script>
+    <script src="../assets/js/cart.js"></script>
     <script src="../assets/js/profile.js"></script>
 </body>
 </html>

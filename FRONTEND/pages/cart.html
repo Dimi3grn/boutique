@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tempora - Montres de Luxe</title>
+    <title>Mon Panier | Tempora</title>
     <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/catalogue.css">
+    <link rel="stylesheet" href="../assets/css/cart.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
@@ -39,7 +41,7 @@
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <input type="text" class="search-input" placeholder="Rechercher..." aria-label="Search" id="search-input">
+                    <input type="text" class="search-input" placeholder="Rechercher..." aria-label="Search">
                 </div>
             </div>
             <div class="title">
@@ -62,55 +64,20 @@
                 </div>
             </div>
         </header>
-        <div class="pageContent">
-            <div class="videoMain">
-                <video 
-                    id="background-video" 
-                    poster="../assets/img/rolexframe1.jpg" 
-                    muted 
-                    playsinline>
-                    <source src="../assets/videos/Rolex Day-Date.mp4" type="video/mp4">
-                </video>
-                <div class="overlay-text">
-                    <p>OYSTER PERPETUAL</p>
-                    <h2>Day-Date</h2>
-                    <button id="featured-button">Shop Now</button>
-                </div>
+        
+        <div class="cart-container">
+            <div class="cart-header">
+                <h2>Mon Panier</h2>
+                <p>Gérez les articles de votre panier avant de passer commande</p>
             </div>
-            <div class="categories-rec">
-                <h2>Explore a selection of categories</h2>
-                <div class="categories-cont">
-                    <a href="catalogue.html?category=luxury">
-                    <div class="cat1 cat">
-                        <img src="../assets/img/Luxury_cat.jpg" alt="Luxury">
-                        <p>Luxury</p>
-                    </div>
-                    </a>    
-                    <a href="catalogue.html?category=dress">
-                    <div class="cat2 cat">
-                        <img src="../assets/img/dress_cat.jpg" alt="Dress">
-                        <p>Dress</p>
-                    </div>
-                    </a>
-                    <a href="catalogue.html?category=sport">
-                    <div class="cat3 cat">
-                        <img src="../assets/img/sport_cat.png" alt="Sport">
-                        <p>Sport</p>
-                    </div>
-                    </a>
-                    <a href="catalogue.html?category=diving">
-                    <div class="cat4 cat">
-                        <img src="../assets/img/diving_cat.jpg" alt="Diving">
-                        <p>Diving</p>
-                    </div>
-                    </a>
-                </div>
+            
+            <div id="cart-container">
+                <!-- Cart items will be loaded here via JavaScript -->
+                <p class="loading-message">Chargement de votre panier...</p>
             </div>
         </div>
     </main>
-    <script src="../assets/js/commonredirects.js"></script>
     <script src="../assets/js/front.js"></script>
-    <script src="../assets/js/main.js"></script>
     <script src="../assets/js/commont_fav.js"></script>
     <script src="../assets/js/cart.js"></script>
 </body>

@@ -6,6 +6,7 @@
     <title>Catalogue | Tempora</title>
     <link rel="stylesheet" href="../assets/css/main.css">
     <link rel="stylesheet" href="../assets/css/catalogue.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <div class="menu-overlay"></div>
@@ -126,26 +127,7 @@
     <script src="../assets/js/commonredirects.js"></script>
     <script src="../assets/js/front.js"></script>
     <script src="../assets/js/catalogue.js"></script>
-    <script>
-        // Heart icon redirect to favorites
-        document.addEventListener('DOMContentLoaded', function() {
-            const heartIcon = document.querySelector('.heart');
-            
-            // Set up event listener for heart icon in the header
-            if (heartIcon) {
-                heartIcon.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const user = JSON.parse(localStorage.getItem('user'));
-                    if (user) {
-                        // User is logged in, navigate to favorites page
-                        window.location.href = 'favorites.html';
-                    } else {
-                        // Not logged in, redirect to login with a return URL
-                        window.location.href = 'login.html?returnTo=favorites.html';
-                    }
-                });
-            }
-        });
-    </script>
+    <script src="../assets/js/commont_fav.js"></script>
+    <script src="../assets/js/cart.js"></script>
 </body>
 </html>

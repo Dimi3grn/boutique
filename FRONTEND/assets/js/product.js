@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <input type="number" id="quantity" value="1" min="1" max="${watch.stock || 10}">
                         <button onclick="increaseQuantity()">+</button>
                     </div>
-                    <button class="add-to-cart-btn" onclick="addToCart(${watch.montre_id})">Ajouter au panier</button>
+                    <button class="add-to-cart-btn" onclick="addToCartHandler(${watch.montre_id})">Ajouter au panier</button>
                 </div>
             </div>
         `;
@@ -255,26 +255,43 @@ function increaseQuantity() {
     }
 }
 
-function addToCart(productId) {
+// Handler for adding to cart button
+function addToCartHandler(productId) {
     const quantityInput = document.getElementById('quantity');
     if (!quantityInput) return;
     
     const quantity = parseInt(quantityInput.value);
-    const colorElement = document.querySelector('.color-option.active');
-    const colorId = colorElement ? colorElement.getAttribute('data-color-id') : null;
+    if (quantity < 1) return;
     
-    const cartItem = {
-        productId,
-        quantity,
-        colorId
-    };
+    // Check if user is logged in
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = localStorage.getItem('authToken');
     
-    console.log('Adding to cart:', cartItem);
-    showMessage('success', 'Produit ajouté au panier !');
+    if (!user || !token) {
+        // Not logged in, redirect to login
+        window.location.href = `login.html?returnTo=product.html?id=${productId}`;
+        return;
+    }
+    
+    // Call the global addToCart function if it exists
+    if (typeof window.addToCart === 'function') {
+        window.addToCart(productId, quantity);
+    } else {
+        // Fallback if the function doesn't exist
+        console.error('addToCart function not found');
+        showMessage('error', 'Une erreur s\'est produite. Veuillez réessayer.');
+    }
 }
 
-// Message toast function (if not already defined by favorites.js)
+// Message toast function (if not already defined by other scripts)
 function showMessage(type, message) {
+    // Use the global showMessage function if available
+    if (typeof window.showMessage === 'function') {
+        window.showMessage(type, message);
+        return;
+    }
+    
+    // Otherwise, implement a local version
     let messageElement = document.querySelector('.message-toast');
     
     if (!messageElement) {
