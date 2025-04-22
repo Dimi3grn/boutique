@@ -1,4 +1,4 @@
-// Modified cart.js
+// Modified cart.js to handle stock management
 document.addEventListener('DOMContentLoaded', function() {
     const baseUrl = "http://localhost:3000/";
     const backendUrl = "http://localhost:3000";
@@ -61,7 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 2000);
                     throw new Error('Session expirée');
                 }
-                throw new Error('Network response was not ok');
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Network response was not ok');
+                });
             }
             return response.json();
         })
@@ -78,8 +80,12 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error adding to cart:', error);
-            if (!error.message.includes('Session expirée')) {
-                showMessage('error', 'Impossible d\'ajouter au panier');
+            if (error.message.includes('Stock insuffisant')) {
+                showMessage('error', 'Stock insuffisant pour ce produit');
+            } else if (error.message.includes('quantité totale dépasse')) {
+                showMessage('error', 'La quantité demandée dépasse le stock disponible');
+            } else if (!error.message.includes('Session expirée')) {
+                showMessage('error', 'Impossible d\'ajouter au panier: ' + error.message);
             }
         });
     }
@@ -108,7 +114,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 2000);
                     throw new Error('Session expirée');
                 }
-                throw new Error('Network response was not ok');
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Network response was not ok');
+                });
             }
             return response.json();
         })
@@ -127,8 +135,13 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Error updating cart:', error);
-            if (!error.message.includes('Session expirée')) {
-                showMessage('error', 'Impossible de mettre à jour le panier');
+            if (error.message.includes('supérieure au stock')) {
+                showMessage('error', 'Quantité demandée supérieure au stock disponible');
+                if (window.location.pathname.includes('cart.html')) {
+                    loadCart(); // Reload to get current quantities
+                }
+            } else if (!error.message.includes('Session expirée')) {
+                showMessage('error', 'Impossible de mettre à jour le panier: ' + error.message);
             }
         });
     };
@@ -250,6 +263,80 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
     
+    // Process checkout
+    window.processCheckout = function() {
+        const token = localStorage.getItem('authToken');
+        
+        if (!token) {
+            showMessage('error', 'Vous devez être connecté pour finaliser votre commande');
+            setTimeout(() => {
+                window.location.href = 'login.html?returnTo=cart.html';
+            }, 2000);
+            return;
+        }
+        
+        // Process the checkout and update stock
+        fetch(`${baseUrl}api/cart/checkout`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('authToken');
+                    showMessage('error', 'Session expirée, veuillez vous reconnecter');
+                    setTimeout(() => {
+                        window.location.href = 'login.html?returnTo=cart.html';
+                    }, 2000);
+                    throw new Error('Session expirée');
+                }
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Network response was not ok');
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.message === "Commande traitée avec succès") {
+                // Show success message
+                showMessage('success', 'Commande validée avec succès! Merci pour votre achat.');
+                
+                // Update cart count indicator (should be 0 now)
+                updateCartCountIndicator();
+                
+                // If on cart page, show empty cart
+                if (window.location.pathname.includes('cart.html')) {
+                    setTimeout(() => {
+                        document.getElementById('cart-container').innerHTML = `
+                            <div class="empty-cart">
+                                <p>Votre panier est vide. Parcourez notre catalogue pour ajouter des produits !</p>
+                                <a href="catalogue.html" class="browse-button">Parcourir les montres</a>
+                            </div>
+                        `;
+                    }, 1500);
+                }
+            } else {
+                throw new Error(data.message || 'Échec de la finalisation de la commande');
+            }
+        })
+        .catch(error => {
+            console.error('Error processing checkout:', error);
+            if (error.message.includes('n\'ont pas de stock suffisant')) {
+                showMessage('error', 'Certains articles n\'ont pas de stock suffisant. Veuillez actualiser votre panier.');
+                // Reload cart to get updated stock information
+                if (window.location.pathname.includes('cart.html')) {
+                    setTimeout(() => loadCart(), 2000);
+                }
+            } else if (!error.message.includes('Session expirée')) {
+                showMessage('error', 'Impossible de finaliser la commande: ' + error.message);
+            }
+        });
+    };
+    
     // Function to load cart on the cart page
     window.loadCart = function() {
         const user = JSON.parse(localStorage.getItem('user'));
@@ -318,6 +405,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const cartContainer = document.getElementById('cart-container');
         if (!cartContainer) return;
         
+        // Check if any items are out of stock
+        const stockIssues = cartItems.some(item => !item.hasEnoughStock);
+        
         let html = `
             <table class="cart-table">
                 <thead>
@@ -344,8 +434,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // Format image path
             const imagePath = getFullImagePath(item.image1);
             
+            // Check if item is out of stock or has insufficient stock
+            const hasStockIssue = !item.hasEnoughStock;
+            const stockWarning = hasStockIssue 
+                ? `<div class="stock-warning">Stock disponible: ${item.availableStock}</div>` 
+                : '';
+            
             html += `
-                <tr data-product-id="${item.montre_id}">
+                <tr data-product-id="${item.montre_id}" class="${hasStockIssue ? 'stock-issue' : ''}">
                     <td>
                         <div style="display: flex; align-items: center;">
                             <div class="cart-product-image">
@@ -354,6 +450,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="cart-product-info">
                                 <h3>${item.nom}</h3>
                                 <p>${item.marque}</p>
+                                ${stockWarning}
                             </div>
                         </div>
                     </td>
@@ -365,10 +462,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     </td>
                     <td>
                         <div class="cart-quantity">
-                            <button onclick="decrementQuantity(${item.montre_id})">-</button>
-                            <input type="number" value="${item.quantity}" min="1" max="${item.stock || 10}" 
-                                   onchange="updateCartQuantity(${item.montre_id}, this.value)">
-                            <button onclick="incrementQuantity(${item.montre_id})">+</button>
+                            <button onclick="decrementQuantity(${item.montre_id})" ${hasStockIssue ? 'disabled' : ''}>-</button>
+                            <input type="number" value="${item.quantity}" min="1" max="${item.availableStock}" 
+                                   onchange="updateCartQuantity(${item.montre_id}, this.value)" ${hasStockIssue ? 'disabled' : ''}>
+                            <button onclick="incrementQuantity(${item.montre_id})" ${hasStockIssue ? 'disabled' : ''}>+</button>
                         </div>
                     </td>
                     <td class="cart-price">
@@ -389,6 +486,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             <div class="cart-summary">
                 <h3>Résumé de la commande</h3>
+                ${stockIssues ? '<div class="stock-alert">Attention: certains articles de votre panier ont des problèmes de stock.</div>' : ''}
                 <div class="summary-row">
                     <span>Sous-total:</span>
                     <span>${totalPrice.toFixed(2)} €</span>
@@ -405,7 +503,9 @@ document.addEventListener('DOMContentLoaded', function() {
             
             <div class="cart-buttons">
                 <a href="catalogue.html" class="continue-shopping">Continuer mes achats</a>
-                <button class="checkout-button" onclick="processCheckout()">Procéder au paiement</button>
+                <button class="checkout-button ${stockIssues ? 'disabled' : ''}" onclick="processCheckout()" ${stockIssues ? 'disabled' : ''}>
+                    ${stockIssues ? 'Stock insuffisant' : 'Procéder au paiement'}
+                </button>
                 <button class="continue-shopping" onclick="clearCart()">Vider le panier</button>
             </div>
         `;
@@ -495,6 +595,24 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 // Update summary
                 updateCartSummary();
+                
+                // Check if all stock issues are resolved
+                const stockIssueItems = document.querySelectorAll('.cart-table tbody tr.stock-issue');
+                if (stockIssueItems.length === 0) {
+                    // Enable checkout button if no more stock issues
+                    const checkoutButton = document.querySelector('.checkout-button');
+                    if (checkoutButton) {
+                        checkoutButton.classList.remove('disabled');
+                        checkoutButton.disabled = false;
+                        checkoutButton.textContent = 'Procéder au paiement';
+                    }
+                    
+                    // Remove stock alert
+                    const stockAlert = document.querySelector('.stock-alert');
+                    if (stockAlert) {
+                        stockAlert.remove();
+                    }
+                }
             }
         }, 300);
     }
@@ -607,18 +725,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateCartQuantity(watchId, newValue);
             }
         }
-    };
-    
-    // Process checkout function
-    window.processCheckout = function() {
-        // This would normally connect to a payment system
-        // For this demo, just display a success message
-        showMessage('success', 'Commande validée avec succès! Merci pour votre achat.');
-        
-        // Clear the cart after checkout
-        setTimeout(() => {
-            clearCart();
-        }, 1500);
     };
     
     // Function to show success/error messages (global, can be used by other scripts)

@@ -127,7 +127,7 @@
 .product-price {
     font-size: 28px;
     font-weight: 600;
-    margin-bottom: 25px;
+    margin-bottom: 15px;
 }
 
 .reduction {
@@ -135,6 +135,39 @@
     margin-left: 10px;
     font-size: 20px;
     font-weight: 500;
+}
+
+/* Stock status styles */
+.stock-status {
+    margin-bottom: 25px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.in-stock {
+    color: #2e8b57; /* Dark green */
+    display: flex;
+    align-items: center;
+}
+
+.in-stock::before {
+    content: "•";
+    color: #2e8b57;
+    font-size: 24px;
+    margin-right: 8px;
+}
+
+.out-of-stock {
+    color: #e74c3c; /* Red */
+    display: flex;
+    align-items: center;
+}
+
+.out-of-stock::before {
+    content: "•";
+    color: #e74c3c;
+    font-size: 24px;
+    margin-right: 8px;
 }
 
 .product-description {
@@ -210,6 +243,11 @@
     cursor: pointer;
 }
 
+.quantity-selector button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .quantity-selector input {
     width: 50px;
     height: 40px;
@@ -218,6 +256,11 @@
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;
     font-size: 16px;
+}
+
+.quantity-selector input:disabled {
+    background-color: #f9f9f9;
+    color: #999;
 }
 
 .add-to-cart-btn {
@@ -229,10 +272,16 @@
     font-size: 16px;
     cursor: pointer;
     flex-grow: 1;
+    transition: background-color 0.3s;
 }
 
 .add-to-cart-btn:hover {
     background-color: #333;
+}
+
+.add-to-cart-btn.disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 
 .error-message {

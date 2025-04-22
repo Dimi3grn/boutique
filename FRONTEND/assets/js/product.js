@@ -77,6 +77,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const image1Full = getFullImagePath(watch.image1);
         const image2Full = getFullImagePath(watch.image2);
         
+        // Check if the watch is in stock
+        const isInStock = watch.stock > 0;
+        const stockStatus = isInStock ? 
+            `<span class="in-stock">En stock (${watch.stock} disponibles)</span>` : 
+            '<span class="out-of-stock">Rupture de stock</span>';
+        
         // Create HTML structure for product details
         const productHTML = `
             <div class="product-images">
@@ -107,6 +113,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 </div>
                 
+                <div class="stock-status">
+                    ${stockStatus}
+                </div>
+                
                 <div class="product-description">
                     <p>${watch.description}</p>
                 </div>
@@ -130,11 +140,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 <div class="product-actions">
                     <div class="quantity-selector">
-                        <button onclick="decreaseQuantity()">-</button>
-                        <input type="number" id="quantity" value="1" min="1" max="${watch.stock || 10}">
-                        <button onclick="increaseQuantity()">+</button>
+                        <button onclick="decreaseQuantity()" ${!isInStock ? 'disabled' : ''}>-</button>
+                        <input type="number" id="quantity" value="1" min="1" max="${watch.stock || 0}" ${!isInStock ? 'disabled' : ''}>
+                        <button onclick="increaseQuantity(${watch.stock})" ${!isInStock ? 'disabled' : ''}>+</button>
                     </div>
-                    <button class="add-to-cart-btn" onclick="addToCartHandler(${watch.montre_id})">Ajouter au panier</button>
+                    <button class="add-to-cart-btn ${!isInStock ? 'disabled' : ''}" 
+                            onclick="addToCartHandler(${watch.montre_id})" 
+                            ${!isInStock ? 'disabled' : ''}>
+                        ${isInStock ? 'Ajouter au panier' : 'Indisponible'}
+                    </button>
                 </div>
             </div>
         `;
@@ -236,7 +250,7 @@ function changeMainImage(src, thumbnailElement) {
 
 function decreaseQuantity() {
     const quantityInput = document.getElementById('quantity');
-    if (!quantityInput) return;
+    if (!quantityInput || quantityInput.disabled) return;
     
     const currentValue = parseInt(quantityInput.value);
     if (currentValue > 1) {
@@ -244,12 +258,12 @@ function decreaseQuantity() {
     }
 }
 
-function increaseQuantity() {
+function increaseQuantity(maxStock) {
     const quantityInput = document.getElementById('quantity');
-    if (!quantityInput) return;
+    if (!quantityInput || quantityInput.disabled) return;
     
     const currentValue = parseInt(quantityInput.value);
-    const maxValue = parseInt(quantityInput.getAttribute('max') || 10);
+    const maxValue = maxStock || parseInt(quantityInput.getAttribute('max') || 0);
     if (currentValue < maxValue) {
         quantityInput.value = currentValue + 1;
     }
@@ -257,6 +271,12 @@ function increaseQuantity() {
 
 // Handler for adding to cart button
 function addToCartHandler(productId) {
+    const addToCartBtn = document.querySelector('.add-to-cart-btn');
+    if (addToCartBtn.classList.contains('disabled')) {
+        showMessage('error', 'Ce produit est actuellement indisponible');
+        return;
+    }
+    
     const quantityInput = document.getElementById('quantity');
     if (!quantityInput) return;
     

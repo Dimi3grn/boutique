@@ -4,9 +4,15 @@ exports.getAllWatches = async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM montre');
         
+        // Add inStock flag to each watch
+        const watches = rows.map(watch => ({
+            ...watch,
+            inStock: watch.stock > 0
+        }));
+        
         res.status(200).json({
             message: "Watches found",
-            watches: rows
+            watches: watches
         });
         
     } catch (error) {
@@ -25,9 +31,13 @@ exports.getWatchById = async (req, res) => {
             return res.status(404).json({ message: "Watch not found" });
         }
 
+        // Add stock availability flag for frontend
+        const watch = rows[0];
+        watch.inStock = watch.stock > 0;
+
         res.status(200).json({
             message: "Watch found",
-            watch: rows[0]
+            watch: watch
         });
         
     } catch (error) {
@@ -227,6 +237,16 @@ exports.filterWatches = async (req, res) => {
             watches: rows
         });
         
+        const filteredWatches = watches.map(watch => ({
+            ...watch,
+            inStock: watch.stock > 0
+        }));
+        
+        res.status(200).json({
+            message: "Filtered watches found",
+            count: filteredWatches.length,
+            watches: filteredWatches
+        });
     } catch (error) {
         console.error('Error filtering watches:', error);
         res.status(500).json({ message: "Server error", error: error.message });

@@ -9,6 +9,10 @@ router.use(authMiddleware.verifyToken);
 // Add a watch to cart
 router.post("/", controllers.addToCart);
 
+// Clear cart (remove all items)
+// Make sure this route is defined BEFORE /:watchId route to avoid conflicts
+router.delete("/clear", controllers.clearCart);
+
 // Remove a watch from cart
 router.delete("/:watchId", controllers.removeFromCart);
 
@@ -24,8 +28,9 @@ router.get("/check/:watchId", controllers.checkIsInCart);
 // Get cart count (number of items)
 router.get("/count", controllers.getCartCount);
 
-// Clear cart (remove all items)
-// Make sure this route is defined BEFORE /:watchId route to avoid conflicts
-router.delete("/clear", controllers.clearCart);
+// Process checkout and update stock
+router.post("/checkout", controllers.processCheckout);
+
+
 
 module.exports = router;

@@ -1,4 +1,4 @@
-/* cart.css */
+/* Cart page styles with stock management indicators */
 .cart-container {
     max-width: 1400px;
     margin: 120px auto 50px;
@@ -52,6 +52,32 @@
 
 .cart-table tr:hover {
     background-color: #f9f9f9;
+}
+
+/* Stock issue styles */
+.cart-table tr.stock-issue {
+    background-color: #fff5f5;
+}
+
+.cart-table tr.stock-issue:hover {
+    background-color: #ffe5e5;
+}
+
+.stock-warning {
+    color: #e74c3c;
+    font-size: 12px;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+.stock-alert {
+    background-color: #fff5f5;
+    border-left: 4px solid #e74c3c;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    color: #e74c3c;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 /* Product image in cart */
@@ -109,6 +135,12 @@
     background-color: #ddd;
 }
 
+.cart-quantity button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #f1f1f1;
+}
+
 .cart-quantity input {
     width: 40px;
     height: 30px;
@@ -117,6 +149,11 @@
     text-align: center;
     margin: 0 5px;
     font-size: 14px;
+}
+
+.cart-quantity input:disabled {
+    background-color: #f9f9f9;
+    color: #999;
 }
 
 /* Price display */
@@ -217,6 +254,15 @@
     background-color: #333;
 }
 
+.checkout-button.disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.checkout-button.disabled:hover {
+    background-color: #ccc;
+}
+
 /* Empty cart state */
 .empty-cart {
     text-align: center;
@@ -264,7 +310,7 @@
     font-weight: bold;
 }
 
-/* Message toast for notifications (if not already defined) */
+/* Message toast for notifications */
 .message-toast {
     position: fixed;
     bottom: 20px;
