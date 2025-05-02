@@ -154,20 +154,9 @@ BACKEND/
                 └── ...
 ```
 
-### Création d'un utilisateur administrateur
+## Erreur fréquente
 
-Pour créer un utilisateur administrateur pour gérer les produits et les commandes :
-
-1. Inscrivez-vous en tant qu'utilisateur régulier via le frontend
-
-2. Accédez à votre base de données via phpMyAdmin :
-   - Ouvrez `http://localhost/phpmyadmin`
-   - Cliquez sur la base de données "roberto"
-   - Cliquez sur la table "users"
-   - Trouvez votre utilisateur dans la liste
-   - Cliquez sur "Éditer"
-   - Modifiez la colonne "role" pour y mettre la valeur "admin"
-   - Cliquez sur "Exécuter"
+Le chargement de produits depuis la base de données a du mal lorsqu'on clone le répo, si vous voyez un message d'erreur : "Une erreur est survenue lors du chargement des produits.", essayez de recharger la page, je ne sais pas la source de cette erreur car elle n'était pas dans le dossier du projet initalement créé, uniquement lorsqu'on clone le répo.
 
 ## Dépannage
 
