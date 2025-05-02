@@ -10,7 +10,6 @@ Tempora est une plateforme e-commerce complète dédiée aux montres de luxe, av
 - Panier d'achat avec gestion des stocks
 - Fonctionnalité de favoris/liste de souhaits
 - Navigation par catégories
-- Design responsive pour tous les appareils
 
 ## Installation
 
