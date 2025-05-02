@@ -23,8 +23,8 @@ Tempora est une plateforme e-commerce complète dédiée aux montres de luxe, av
 ### Étape 1 : Cloner le dépôt
 
 ```bash
-git clone https://github.com/votreutilisateur/tempora-watch-shop.git
-cd tempora-watch-shop
+git clone https://github.com/Dimi3grn/boutique.git
+cd boutique
 ```
 
 ### Étape 2 : Configuration de la base de données avec WAMP
