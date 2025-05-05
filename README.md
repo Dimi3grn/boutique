@@ -174,6 +174,7 @@ Si vous rencontrez des problèmes pendant l'installation :
 3. **Dépendances manquantes** :
    - Exécutez à nouveau `npm install` dans le répertoire backend
    - Vérifiez s'il y a des messages d'erreur pendant l'installation
+   - npm install -g supervisor dans le dossier backend si ya un probleme en plus
 
 4. **API ne fonctionne pas** :
    - Assurez-vous que le serveur backend est en cours d'exécution
